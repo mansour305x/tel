@@ -1,6 +1,7 @@
 import asyncio
 import csv
 import html
+import json
 import logging
 import os
 import shutil
@@ -43,6 +44,50 @@ DB_NAME = "mansour_factory.db"
 BACKUP_DIR = BASE_DIR / "backups"
 BACKUP_DIR.mkdir(exist_ok=True)
 
+DATA_DIR = BASE_DIR / "data"
+TEMPLATES_FILE = DATA_DIR / "templates.json"
+BUTTONS_FILE = DATA_DIR / "buttons.json"
+DATA_DIR.mkdir(exist_ok=True)
+
+DEFAULT_TEMPLATES = [
+    {"key": "bot_factory", "label": "صانع البوتات", "description": "صانع بوتات جاهز مع قالبٍ كامل وإدارة بسيطة.", "category": "بوتات", "visible": True, "requires_subbot": False},
+    {"key": "voice_messages", "label": "بوت الرسائل الصوتية", "description": "بوت لإرسال واستقبال الرسائل الصوتية بسهولة.", "category": "بوتات", "visible": True, "requires_subbot": False},
+    {"key": "store_bot", "label": "المتجر", "description": "بوت متجر إلكتروني لعرض منتجاتك واستقبال الطلبات.", "category": "بوتات", "visible": True, "requires_subbot": False},
+    {"key": "channel_posts", "label": "إدارة منشورات القناة", "description": "أدوات لإعداد ونشر منشورات القناة بشكل احترافي.", "category": "قنوات", "visible": True, "requires_subbot": False},
+    {"key": "comments_bot", "label": "التعليقات", "description": "بوت لإدارة التعليقات والردود داخل القناة أو المجموعة.", "category": "قنوات", "visible": True, "requires_subbot": False},
+    {"key": "post_builder", "label": "إنشاء منشورات احترافية", "description": "انشئ منشورات جذابة باستخدام قوالب جاهزة ونصوص مخصصة.", "category": "سوشيال", "visible": True, "requires_subbot": False},
+    {"key": "logo_maker", "label": "إنشاء لوجو", "description": "بوت تصميم شعار مباشر مع طرق سهلة للاختيار.", "category": "تصميم", "visible": True, "requires_subbot": False},
+    {"key": "translation_bot", "label": "بوت الترجمة", "description": "بوت للترجمة الفورية بين عدة لغات.", "category": "أدوات", "visible": True, "requires_subbot": False},
+    {"key": "proxy_bot", "label": "بروكسي", "description": "بوت لتوليد وادارة بروكسيهات آمنة للمستخدمين.", "category": "أمن", "visible": True, "requires_subbot": False},
+    {"key": "download_bot", "label": "بوت تحميل", "description": "بوت لتحميل الوسائط من الروابط المختلفة.", "category": "تحميل", "visible": True, "requires_subbot": False},
+    {"key": "channel_funding", "label": "تمويل قنوات", "description": "بوت لإدارة الدعم المالي والاشتراكات للقنوات.", "category": "تمويل", "visible": True, "requires_subbot": False},
+    {"key": "ai_chat", "label": "التحدث مع الذكاء الاصطناعي", "description": "بوت دردشة ذكي مع واجهة تفاعلية.", "category": "ذكاء اصطناعي", "visible": True, "requires_subbot": False},
+    {"key": "site_builder", "label": "سايت", "description": "بوت لتوليد صفحات ويب سريعة من داخل تيليجرام.", "category": "ويب", "visible": True, "requires_subbot": False},
+    {"key": "image_analysis", "label": "تحليل الصور", "description": "بوت لتحليل الصور والتعرف على محتواها.", "category": "ذكاء اصطناعي", "visible": True, "requires_subbot": False},
+    {"key": "whisper_bot", "label": "بوت الهمسة", "description": "بوت لإرسال رسائل خاصة مع حفظ الخصوصية.", "category": "دردشة", "visible": True, "requires_subbot": False},
+    {"key": "button_bot", "label": "بوت الأزرار", "description": "بوت ينشئ أزرارًا مخصصة لتنفيذ أوامر مختلفة.", "category": "أدوات", "visible": True, "requires_subbot": False},
+    {"key": "text_copy", "label": "نسخ النصوص", "description": "بوت لتحويل المحتوى من صيغة إلى أخرى أو نسخه بسرعة.", "category": "أدوات", "visible": True, "requires_subbot": False},
+    {"key": "name_meaning", "label": "معاني أسماء", "description": "بوت لعرض معاني الأسماء وخلفياتها.", "category": "معلومات", "visible": True, "requires_subbot": False},
+    {"key": "channel_links", "label": "استخراج روابط القنوات", "description": "بوت لاستخراج روابط القنوات والمجموعات بسهولة.", "category": "أدوات", "visible": True, "requires_subbot": False},
+    {"key": "file_convert", "label": "تحويل صيغ الملفات", "description": "بوت لتحويل أنواع الملفات بين صيغ متعددة.", "category": "أدوات", "visible": True, "requires_subbot": False},
+    {"key": "roulette_game", "label": "لعبة الروليت", "description": "بوت لعبة ترفيهية مع نظام قواعد بسيط.", "category": "ترفيه", "visible": True, "requires_subbot": False},
+    {"key": "background_remove", "label": "حذف الخلفية من الصور", "description": "بوت لتحرير الصور وإزالة الخلفية تلقائياً.", "category": "تصميم", "visible": True, "requires_subbot": False},
+    {"key": "gift_songs", "label": "إهداء الأغاني", "description": "بوت لإهداء الأغاني والمحتوى الموسيقي للأصدقاء.", "category": "ترفيه", "visible": True, "requires_subbot": False},
+    {"key": "account_management", "label": "إدارة حساب", "description": "بوت لتنظيم الحسابات وحمايتها.", "category": "أمان", "visible": True, "requires_subbot": False},
+    {"key": "photo_to_anime", "label": "تحويل الصور إلى أنمي", "description": "بوت لتحويل الصور إلى ستايل أنمي تلقائياً.", "category": "تصميم", "visible": True, "requires_subbot": False},
+    {"key": "join_approval", "label": "الموافقة على الانضمام", "description": "بوت لإدارة قبول الأعضاء الجدد.", "category": "مجتمعات", "visible": True, "requires_subbot": False},
+    {"key": "member_check", "label": "تحقق من العضو", "description": "بوت لفحص حالة العضو وصلاحياته.", "category": "أدوات", "visible": True, "requires_subbot": False},
+    {"key": "announcements", "label": "الإعلانات", "description": "بوت لإرسال الإعلانات وجدولتها بشكل احترافي.", "category": "قنوات", "visible": True, "requires_subbot": False},
+    {"key": "remove_audio", "label": "إزالة الصوت من الأغاني", "description": "بوت لتحويل الأغاني إلى ملفات بدون صوت.", "category": "صوت", "visible": True, "requires_subbot": False},
+    {"key": "age_calculator", "label": "حساب العمر", "description": "بوت لحساب العمر بناءً على تاريخ الميلاد.", "category": "أدوات", "visible": True, "requires_subbot": False},
+    {"key": "quality_fix", "label": "إصلاح جودة الصورة", "description": "بوت لتحسين جودة الصور تلقائياً.", "category": "تصميم", "visible": True, "requires_subbot": False},
+    {"key": "text_to_speech", "label": "تحويل النص إلى صوت", "description": "بوت لتحويل النصوص إلى تسجيلات صوتية.", "category": "صوت", "visible": True, "requires_subbot": False},
+    {"key": "sticker_maker", "label": "صانع ملصقات", "description": "بوت لإنشاء ملصقات تيليجرام من الصور والنصوص.", "category": "تصميم", "visible": True, "requires_subbot": False},
+    {"key": "temp_email", "label": "بريد إلكتروني مؤقت", "description": "بوت لإنشاء بريد إلكتروني مؤقت للاستخدام السريع.", "category": "أمن", "visible": True, "requires_subbot": False},
+    {"key": "channel_protection", "label": "حماية القنوات", "description": "بوت لحماية القنوات من الرسائل المزعجة والهجمات.", "category": "أمان", "visible": True, "requires_subbot": False},
+    {"key": "copyright_overlay", "label": "كتابة حقوق على الصور", "description": "بوت لإضافة علامة مائية على الصور تلقائياً.", "category": "تصميم", "visible": True, "requires_subbot": False},
+    {"key": "words_to_image", "label": "تحويل الكلمات إلى صور", "description": "بوت لتحويل النصوص الوصفية إلى صور سهلة الاستخدام.", "category": "تصميم", "visible": True, "requires_subbot": False},
+]
 
 DEFAULT_TEXTS = {
     "welcome": """<b>🤖 Mansour Factory</b>
@@ -139,6 +184,22 @@ class AddAdminState(StatesGroup):
 
 class RemoveAdminState(StatesGroup):
     waiting_user_id = State()
+
+
+class BuilderTemplateState(StatesGroup):
+    waiting_key = State()
+    waiting_label = State()
+    waiting_description = State()
+    waiting_visible = State()
+    waiting_preview = State()
+
+
+class BuilderButtonState(StatesGroup):
+    waiting_name = State()
+    waiting_location = State()
+    waiting_action_type = State()
+    waiting_action_value = State()
+    waiting_preview = State()
 
 
 def now() -> str:
@@ -313,6 +374,124 @@ def reset_button(key: str):
         set_button(key, DEFAULT_BUTTONS[key])
 
 
+def ensure_templates_file():
+    if not TEMPLATES_FILE.exists():
+        TEMPLATES_FILE.write_text(json.dumps(DEFAULT_TEMPLATES, ensure_ascii=False, indent=2), encoding="utf-8")
+        return
+
+    try:
+        templates = json.loads(TEMPLATES_FILE.read_text(encoding="utf-8"))
+        if not isinstance(templates, list):
+            templates = DEFAULT_TEMPLATES
+    except Exception:
+        templates = DEFAULT_TEMPLATES
+
+    existing_keys = {template.get("key") for template in templates if isinstance(template, dict) and template.get("key")}
+    merged = list(templates)
+    for default_tpl in DEFAULT_TEMPLATES:
+        if default_tpl["key"] not in existing_keys:
+            merged.append(default_tpl)
+    if merged != templates:
+        TEMPLATES_FILE.write_text(json.dumps(merged, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def load_templates(visible_only: bool = True) -> list[dict]:
+    ensure_templates_file()
+    try:
+        templates = json.loads(TEMPLATES_FILE.read_text(encoding="utf-8"))
+    except Exception:
+        templates = DEFAULT_TEMPLATES
+
+    result = [tpl for tpl in templates if isinstance(tpl, dict) and tpl.get("key")]
+    if visible_only:
+        result = [tpl for tpl in result if tpl.get("visible", True)]
+    return result
+
+
+def save_templates(templates: list[dict]):
+    TEMPLATES_FILE.write_text(json.dumps(templates, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def get_template(key: str) -> dict | None:
+    templates = load_templates(visible_only=False)
+    for tpl in templates:
+        if tpl.get("key") == key:
+            return tpl
+    return None
+
+
+def ensure_buttons_file():
+    if not BUTTONS_FILE.exists():
+        BUTTONS_FILE.write_text(json.dumps({"labels": DEFAULT_BUTTONS, "builder_buttons": []}, ensure_ascii=False, indent=2), encoding="utf-8")
+        return
+
+    try:
+        data = json.loads(BUTTONS_FILE.read_text(encoding="utf-8"))
+    except Exception:
+        data = {"labels": DEFAULT_BUTTONS, "builder_buttons": []}
+
+    if isinstance(data, list):
+        data = {"labels": DEFAULT_BUTTONS, "builder_buttons": data}
+    elif isinstance(data, dict) and "builder_buttons" not in data:
+        data = {"labels": data, "builder_buttons": []}
+
+    BUTTONS_FILE.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def load_builder_buttons() -> list[dict]:
+    ensure_buttons_file()
+    try:
+        data = json.loads(BUTTONS_FILE.read_text(encoding="utf-8"))
+    except Exception:
+        data = {"labels": DEFAULT_BUTTONS, "builder_buttons": []}
+
+    if isinstance(data, dict):
+        return data.get("builder_buttons", [])
+    return []
+
+
+def save_builder_buttons(buttons: list[dict]):
+    ensure_buttons_file()
+    try:
+        data = json.loads(BUTTONS_FILE.read_text(encoding="utf-8"))
+    except Exception:
+        data = {"labels": DEFAULT_BUTTONS, "builder_buttons": []}
+    if not isinstance(data, dict):
+        data = {"labels": DEFAULT_BUTTONS, "builder_buttons": []}
+    data["builder_buttons"] = buttons
+    BUTTONS_FILE.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def get_template_buttons(location: str) -> list[dict]:
+    buttons = load_builder_buttons()
+    return [button for button in buttons if button.get("location") == location and button.get("active", True)]
+
+
+def build_dynamic_button(button: dict) -> InlineKeyboardButton:
+    label = button.get("label", "زر")
+    action_type = button.get("action_type")
+    action_value = button.get("action_value")
+
+    if action_type == "url":
+        return InlineKeyboardButton(text=label, url=action_value)
+    if action_type == "menu":
+        return btn(label, action_value or "home")
+    if action_type == "template":
+        return btn(label, f"template_{action_value}")
+    if action_type == "support":
+        return btn(label, "support")
+    if action_type == "stats":
+        return btn(label, "system_status")
+    if action_type == "setting_toggle":
+        return btn(label, action_value or "owner_maintenance")
+
+    return btn(label, button.get("callback", f"dynbtn:{button.get('key')}"))
+
+
+def format_template_button(tpl: dict) -> InlineKeyboardButton:
+    return btn(tpl.get("label", "قالب"), f"template_{tpl.get('key')}")
+
+
 def is_owner(user_id: int) -> bool:
     return OWNER_ID is not None and user_id == OWNER_ID
 
@@ -470,6 +649,18 @@ def back_home():
     ])
 
 
+def builder_menu():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [btn("➕ إضافة قالب", "builder_add_template"), btn("✏️ تعديل قالب", "builder_edit_template")],
+        [btn("🗑 حذف قالب", "builder_delete_template"), btn("🟢 تفعيل قالب", "builder_enable_template")],
+        [btn("🔴 تعطيل قالب", "builder_disable_template"), btn("👁 معاينة القوالب", "builder_list_templates")],
+        [btn("➕ إضافة زر", "builder_add_button"), btn("✏️ تعديل زر", "builder_edit_button")],
+        [btn("🗑 حذف زر", "builder_delete_button"), btn("⚙️ ربط زر بوظيفة", "builder_bind_button")],
+        [btn("👁 معاينة القائمة", "builder_preview_menu")],
+        [btn("⬅️ رجوع", "owner_panel")],
+    ])
+
+
 def main_menu(user_id: int):
     rows = [
         [btn(get_button("create_bot"), "create_bot"), btn(get_button("my_bots"), "my_bots")],
@@ -480,9 +671,52 @@ def main_menu(user_id: int):
     ]
 
     if is_owner(user_id):
+        rows.append([btn("🧩 صانع القوالب والأزرار", "builder_panel")])
+
+        for builder_button in get_template_buttons("main_menu"):
+            rows.append([build_dynamic_button(builder_button)])
+
+    if is_owner(user_id):
         rows.append([btn(get_button("owner_panel"), "owner_panel")])
     elif is_admin(user_id):
         rows.append([btn(get_button("admin_panel"), "admin_panel")])
+
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def templates_menu():
+    templates = load_templates(visible_only=True)
+    rows = []
+    for index, tpl in enumerate(templates):
+        button = format_template_button(tpl)
+        if index % 2 == 0:
+            rows.append([button])
+        else:
+            rows[-1].append(button)
+
+    rows.append([btn("📦 عرض جميع البوتات", "my_bots")])
+    rows.append([btn("🏠 القائمة الرئيسية", "home")])
+
+    for builder_button in get_template_buttons("templates"):
+        rows.append([build_dynamic_button(builder_button)])
+
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def owner_menu():
+    rows = [
+        [btn("🧩 صانع القوالب والأزرار", "builder_panel"), btn("📦 إدارة القوالب", "builder_list_templates")],
+        [btn("🔘 إدارة الأزرار", "builder_list_buttons"), btn("🤖 بوتات العملاء", "owner_projects")],
+        [btn("👥 إدارة المستخدمين", "owner_export_users"), btn("💳 إدارة الاشتراكات", "owner_subscriptions")],
+        [btn("🧾 سجل العمليات", "owner_logs"), btn("🚀 نشر التحديث", "owner_update")],
+        [btn("🧪 فحص النظام", "owner_check"), btn("💾 نسخة احتياطية", "owner_backup")],
+        [btn("🔄 تحديث البوت", "owner_update"), btn("♻️ إعادة تشغيل", "owner_restart")],
+        [btn("👑 معلومات الملكية", "owner_info")],
+        [btn("🏠 القائمة الرئيسية", "home")],
+    ]
+
+    for builder_button in get_template_buttons("owner_menu"):
+        rows.append([build_dynamic_button(builder_button)])
 
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
@@ -804,23 +1038,14 @@ async def templates(callback: CallbackQuery):
 
 @dp.callback_query(F.data.startswith("template_"))
 async def template_selected(callback: CallbackQuery):
-    names = {
-        "template_downloader": "📥 بوت تحميل مقاطع",
-        "template_store": "🛒 بوت متجر",
-        "template_support": "🎫 بوت دعم فني",
-        "template_subscriptions": "💳 بوت اشتراكات",
-        "template_groups": "👥 بوت إدارة قروبات",
-        "template_alerts": "📢 بوت تنبيهات",
-        "template_orders": "🧾 بوت طلبات",
-        "template_ai": "🤖 بوت ذكاء اصطناعي",
-    }
-
-    name = names.get(callback.data, "قالب غير معروف")
+    key = callback.data.split("_", 1)[1]
+    template = get_template(key)
+    name = template.get("label") if template else "قالب غير معروف"
 
     await callback.answer("✅ تم اختيار القالب")
     await safe_edit(
         callback,
-        f"""<b>{name}</b>
+        f"""<b>{esc(name)}</b>
 
 ✅ تم اختيار القالب بنجاح.
 
@@ -828,6 +1053,27 @@ async def template_selected(callback: CallbackQuery):
 ربط القالب بمحرك تشغيل حقيقي.""",
         back_home()
     )
+
+
+@dp.callback_query(F.data.startswith("dynbtn:"))
+async def dynamic_button_selected(callback: CallbackQuery):
+    key = callback.data.split(":", 1)[1]
+    buttons = load_builder_buttons()
+    btn_config = next((b for b in buttons if b.get("key") == key), None)
+
+    if not btn_config:
+        await failed(callback, "❌ الزر غير موجود أو غير مفعّل.")
+        return
+
+    action_type = btn_config.get("action_type")
+    action_value = btn_config.get("action_value")
+
+    await callback.answer("✅ تم تنفيذ الزر")
+
+    if action_type == "message":
+        await callback.message.answer(esc(action_value or "تم الضغط على الزر"))
+    else:
+        await safe_edit(callback, f"✅ تم تنفيذ الزر: {esc(btn_config.get('label', 'زر'))}", back_home())
 
 
 @dp.callback_query(F.data == "my_bots")
@@ -956,6 +1202,138 @@ async def owner_panel(callback: CallbackQuery):
 
     await callback.answer("✅ تم فتح لوحة المالك")
     await safe_edit(callback, "👑 <b>لوحة المالك</b>\n\nاختر العملية:", owner_menu())
+
+
+@dp.callback_query(F.data == "builder_panel")
+async def builder_panel(callback: CallbackQuery):
+    if not is_owner(callback.from_user.id):
+        await failed(callback, "❌ هذه الخاصية للمالك فقط.")
+        return
+
+    await callback.answer("✅ تم فتح صانع القوالب والأزرار")
+    await safe_edit(callback, "🧩 <b>صانع القوالب والأزرار</b>\n\nاختر العملية:", builder_menu())
+
+
+@dp.callback_query(F.data == "builder_list_templates")
+async def builder_list_templates(callback: CallbackQuery):
+    if not is_owner(callback.from_user.id):
+        await failed(callback, "❌ هذه الخاصية للمالك فقط.")
+        return
+
+    await callback.answer("✅ تم فتح قائمة القوالب")
+    await safe_edit(callback, "📦 <b>جميع القوالب</b>\n\nاستعرض القوالب الحالية:", templates_menu())
+
+
+@dp.callback_query(F.data == "builder_list_buttons")
+async def builder_list_buttons(callback: CallbackQuery):
+    if not is_owner(callback.from_user.id):
+        await failed(callback, "❌ هذه الخاصية للمالك فقط.")
+        return
+
+    buttons = load_builder_buttons()
+    if not buttons:
+        text = "لا توجد أزرار مُعرَّفة حالياً. استخدم إضافة زر لإنشاء زر جديد."
+    else:
+        text = "📋 <b>أزرار الصانع</b>\n\n"
+        for btn_cfg in buttons:
+            text += f"• {esc(btn_cfg.get('label', 'بدون اسم'))} — {esc(btn_cfg.get('action_type', 'غير محدد'))}\n"
+
+    await callback.answer("✅ تم فتح قائمة الأزرار")
+    await safe_edit(callback, text, InlineKeyboardMarkup(inline_keyboard=[[btn("⬅️ رجوع", "builder_panel")]]))
+
+
+@dp.callback_query(F.data == "builder_add_template")
+async def builder_add_template(callback: CallbackQuery, state: FSMContext):
+    if not is_owner(callback.from_user.id):
+        await failed(callback, "❌ هذه الخاصية للمالك فقط.")
+        return
+
+    await callback.answer("✅ بدء إضافة قالب جديد")
+    await state.set_state(BuilderTemplateState.waiting_key)
+    await safe_edit(callback, "✏️ أرسل مفتاح القالب الجديد (مثال: bot_factory):", InlineKeyboardMarkup(inline_keyboard=[[btn("❌ إلغاء", "owner_panel")]]))
+
+
+@dp.callback_query(F.data == "builder_add_button")
+async def builder_add_button(callback: CallbackQuery, state: FSMContext):
+    if not is_owner(callback.from_user.id):
+        await failed(callback, "❌ هذه الخاصية للمالك فقط.")
+        return
+
+    await callback.answer("✅ بدء إضافة زر جديد")
+    await state.set_state(BuilderButtonState.waiting_name)
+    await safe_edit(callback, "✏️ أرسل اسم الزر الجديد:", InlineKeyboardMarkup(inline_keyboard=[[btn("❌ إلغاء", "owner_panel")]]))
+
+
+@dp.callback_query(F.data == "builder_edit_template")
+async def builder_edit_template(callback: CallbackQuery):
+    if not is_owner(callback.from_user.id):
+        await failed(callback, "❌ هذه الخاصية للمالك فقط.")
+        return
+    await callback.answer("⚠️ هذه الميزة تحت التطوير")
+    await safe_edit(callback, "✏️ تعديل القوالب قيد الإعداد حاليًا.", builder_menu())
+
+
+@dp.callback_query(F.data == "builder_delete_template")
+async def builder_delete_template(callback: CallbackQuery):
+    if not is_owner(callback.from_user.id):
+        await failed(callback, "❌ هذه الخاصية للمالك فقط.")
+        return
+    await callback.answer("⚠️ هذه الميزة تحت التطوير")
+    await safe_edit(callback, "🗑 حذف القوالب قيد الإعداد حاليًا.", builder_menu())
+
+
+@dp.callback_query(F.data == "builder_enable_template")
+async def builder_enable_template(callback: CallbackQuery):
+    if not is_owner(callback.from_user.id):
+        await failed(callback, "❌ هذه الخاصية للمالك فقط.")
+        return
+    await callback.answer("⚠️ هذه الميزة تحت التطوير")
+    await safe_edit(callback, "✅ تم تفعيل القالب (زر افتراضي).", builder_menu())
+
+
+@dp.callback_query(F.data == "builder_disable_template")
+async def builder_disable_template(callback: CallbackQuery):
+    if not is_owner(callback.from_user.id):
+        await failed(callback, "❌ هذه الخاصية للمالك فقط.")
+        return
+    await callback.answer("⚠️ هذه الميزة تحت التطوير")
+    await safe_edit(callback, "⛔ تم تعطيل القالب (زر افتراضي).", builder_menu())
+
+
+@dp.callback_query(F.data == "builder_preview_menu")
+async def builder_preview_menu(callback: CallbackQuery):
+    if not is_owner(callback.from_user.id):
+        await failed(callback, "❌ هذه الخاصية للمالك فقط.")
+        return
+    await callback.answer("✅ معاينة القائمة")
+    await callback.message.answer("📋 معاينة القوائم قيد الإعداد.", reply_markup=builder_menu())
+
+
+@dp.callback_query(F.data == "builder_edit_button")
+async def builder_edit_button(callback: CallbackQuery):
+    if not is_owner(callback.from_user.id):
+        await failed(callback, "❌ هذه الخاصية للمالك فقط.")
+        return
+    await callback.answer("⚠️ هذه الميزة تحت التطوير")
+    await safe_edit(callback, "✏️ تعديل الأزرار قيد الإعداد حاليًا.", builder_menu())
+
+
+@dp.callback_query(F.data == "builder_delete_button")
+async def builder_delete_button(callback: CallbackQuery):
+    if not is_owner(callback.from_user.id):
+        await failed(callback, "❌ هذه الخاصية للمالك فقط.")
+        return
+    await callback.answer("⚠️ هذه الميزة تحت التطوير")
+    await safe_edit(callback, "🗑 حذف الأزرار قيد الإعداد حاليًا.", builder_menu())
+
+
+@dp.callback_query(F.data == "builder_bind_button")
+async def builder_bind_button(callback: CallbackQuery):
+    if not is_owner(callback.from_user.id):
+        await failed(callback, "❌ هذه الخاصية للمالك فقط.")
+        return
+    await callback.answer("⚠️ هذه الميزة تحت التطوير")
+    await safe_edit(callback, "⚙️ ربط الأزرار قيد الإعداد حاليًا.", builder_menu())
 
 
 @dp.callback_query(F.data == "admin_panel")
@@ -1209,6 +1587,124 @@ async def button_edit_preview(message: Message, state: FSMContext):
 اختر الإجراء:""",
         reply_markup=button_confirm_menu()
     )
+
+
+@dp.message(BuilderTemplateState.waiting_key)
+async def builder_template_receive_key(message: Message, state: FSMContext):
+    key = message.text.strip().lower().replace(" ", "_")
+    if not key:
+        await message.answer("❌ المفتاح لا يمكن أن يكون فارغاً.")
+        return
+
+    await state.set_state(BuilderTemplateState.waiting_label)
+    await state.update_data(key=key)
+    await message.answer("✏️ الآن أرسل اسم القالب:")
+
+
+@dp.message(BuilderTemplateState.waiting_label)
+async def builder_template_receive_label(message: Message, state: FSMContext):
+    label = message.text.strip()
+    if not label:
+        await message.answer("❌ الاسم لا يمكن أن يكون فارغاً.")
+        return
+
+    await state.set_state(BuilderTemplateState.waiting_description)
+    await state.update_data(label=label)
+    await message.answer("✏️ الآن أرسل وصف القالب:")
+
+
+@dp.message(BuilderTemplateState.waiting_description)
+async def builder_template_receive_description(message: Message, state: FSMContext):
+    description = message.text.strip()
+    await state.set_state(BuilderTemplateState.waiting_visible)
+    await state.update_data(description=description)
+    await message.answer("✅ هل تريد أن يكون القالب مرئيًا في القائمة؟ أجب بنعم أو لا:")
+
+
+@dp.message(BuilderTemplateState.waiting_visible)
+async def builder_template_save(message: Message, state: FSMContext):
+    visible_text = message.text.strip().lower()
+    visible = visible_text in ["نعم", "yes", "y", "true", "1"]
+    data = await state.get_data()
+    template = {
+        "key": data.get("key"),
+        "label": data.get("label"),
+        "description": data.get("description", ""),
+        "category": "غير مصنف",
+        "visible": visible,
+        "requires_subbot": False,
+    }
+
+    templates = load_templates(visible_only=False)
+    if any(t.get("key") == template["key"] for t in templates):
+        await message.answer("❌ مفتاح القالب هذا موجود بالفعل. استخدم مفتاحًا آخر.")
+        return
+
+    templates.append(template)
+    save_templates(templates)
+    await state.clear()
+
+    await message.answer(f"✅ تم حفظ القالب الجديد: {esc(template['label'])}", reply_markup=owner_menu())
+
+
+@dp.message(BuilderButtonState.waiting_name)
+async def builder_button_receive_name(message: Message, state: FSMContext):
+    name = message.text.strip()
+    if not name:
+        await message.answer("❌ اسم الزر لا يمكن أن يكون فارغاً.")
+        return
+
+    await state.set_state(BuilderButtonState.waiting_location)
+    await state.update_data(name=name)
+    await message.answer("✏️ الآن أرسل موقع الزر (مثال: main_menu أو owner_menu أو templates):")
+
+
+@dp.message(BuilderButtonState.waiting_location)
+async def builder_button_receive_location(message: Message, state: FSMContext):
+    location = message.text.strip().lower()
+    if not location:
+        await message.answer("❌ الموقع لا يمكن أن يكون فارغاً.")
+        return
+
+    await state.set_state(BuilderButtonState.waiting_action_type)
+    await state.update_data(location=location)
+    await message.answer("✏️ الآن أرسل نوع الإجراء للزر (menu, url, template, support, stats, message):")
+
+
+@dp.message(BuilderButtonState.waiting_action_type)
+async def builder_button_receive_action_type(message: Message, state: FSMContext):
+    action_type = message.text.strip().lower()
+    if action_type not in ["menu", "url", "template", "support", "stats", "message", "setting_toggle"]:
+        await message.answer("❌ النوع غير مدعوم. استخدم: menu, url, template, support, stats, message, setting_toggle")
+        return
+
+    await state.set_state(BuilderButtonState.waiting_action_value)
+    await state.update_data(action_type=action_type)
+    await message.answer("✏️ الآن أرسل قيمة الإجراء (مثلاً اسم القائمة، رابط URL، مفتاح القالب، أو نص الرسالة)")
+
+
+@dp.message(BuilderButtonState.waiting_action_value)
+async def builder_button_save(message: Message, state: FSMContext):
+    action_value = message.text.strip()
+    data = await state.get_data()
+    button = {
+        "key": data.get("name", "button_")[:40].replace(" ", "_").lower(),
+        "label": data.get("name"),
+        "location": data.get("location"),
+        "action_type": data.get("action_type"),
+        "action_value": action_value,
+        "active": True,
+    }
+
+    buttons = load_builder_buttons()
+    if any(b.get("key") == button["key"] for b in buttons):
+        button["key"] = f"{button['key']}_{len(buttons)+1}"
+
+    buttons.append(button)
+    save_builder_buttons(buttons)
+    await state.clear()
+
+    await message.answer(f"✅ تم حفظ الزر الجديد: {esc(button['label'])}", reply_markup=owner_menu())
 
 
 @dp.callback_query(F.data == "button_confirm_save")
@@ -1801,8 +2297,10 @@ async def owner_info(callback: CallbackQuery):
 
 async def main():
     init_db()
+    ensure_templates_file()
+    ensure_buttons_file()
     await bot.delete_webhook(drop_pending_updates=True)
-    print("Mansour Factory Bot V5 is running...")
+    print("Mansour Factory Bot V6 Builder is running...")
     await dp.start_polling(bot)
 
 
