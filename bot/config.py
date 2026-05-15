@@ -1,44 +1,36 @@
-from __future__ import annotations
-
+import os
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
-from pydantic import BaseSettings, Field, validator
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
-class BotConfig(BaseSettings):
-    bot_token: str = Field(..., env="BOT_TOKEN")
-    admin_ids: List[int] = Field(default_factory=list, env="ADMIN_IDS")
-    max_file_size_mb: int = Field(50, env="MAX_FILE_SIZE_MB")
-    download_dir: Path = Field(Path("downloads"), env="DOWNLOAD_DIR")
-    temp_dir: Path = Field(Path("temp"), env="TEMP_DIR")
-    cookies_file: Optional[Path] = Field(None, env="COOKIES_FILE")
-    rate_limit: int = Field(3, env="RATE_LIMIT")
-    workers_count: int = Field(2, env="WORKERS_COUNT")
-    default_quality: str = Field("best", env="DEFAULT_QUALITY")
-    retention_seconds: int = Field(3600, env="RETENTION_SECONDS")
-    database_url: str = Field("sqlite+aiosqlite:///./data/bot.db", env="DATABASE_URL")
-    log_level: str = Field("INFO", env="LOG_LEVEL")
+class BotConfig:
+    def __init__(self) -> None:
+        self.bot_token = os.getenv("BOT_TOKEN", "").strip()
+        if not self.bot_token:
+            raise ValueError("BOT_TOKEN غير موجود داخل ملف .env")
 
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
+        owner_id_raw = os.getenv("OWNER_ID", "").strip()
+        self.owner_id = int(owner_id_raw) if owner_id_raw.isdigit() else None
 
-    @validator("admin_ids", pre=True)
-    def parse_admin_ids(cls, value: str | List[int]) -> List[int]:
-        if isinstance(value, list):
-            return value
-        if not value:
-            return []
-        return [int(item.strip()) for item in str(value).split(",") if item.strip().isdigit()]
+        admin_ids_raw = os.getenv("ADMIN_IDS", "").strip()
+        self.admin_ids = [int(x.strip()) for x in admin_ids_raw.split(",") if x.strip().isdigit()]
+        if self.owner_id and self.owner_id not in self.admin_ids:
+            self.admin_ids.append(self.owner_id)
 
-    @validator("download_dir", "temp_dir", "cookies_file", pre=True)
-    def normalize_paths(cls, value: str | Path | None) -> Optional[Path]:
-        if value is None or value == "":
-            return None
-        return Path(value)
+        self.database_path = Path(os.getenv("DATABASE_PATH", "mansour_factory.db")).resolve()
+        self.backup_dir = self.database_path.parent / "backups"
+        self.log_level = os.getenv("LOG_LEVEL", "INFO").upper()
 
     def ensure_directories(self) -> None:
-        for path in [self.download_dir, self.temp_dir, Path("logs"), Path("data")]:
-            if path is not None:
-                path.mkdir(parents=True, exist_ok=True)
+        self.database_path.parent.mkdir(parents=True, exist_ok=True)
+        self.backup_dir.mkdir(parents=True, exist_ok=True)
+
+    def is_owner(self, user_id: int) -> bool:
+        return self.owner_id is not None and user_id == self.owner_id
+
+    def is_admin(self, user_id: int) -> bool:
+        return self.is_owner(user_id) or user_id in self.admin_ids

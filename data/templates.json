@@ -1,0 +1,4 @@
+[
+  {"key": "restaurant", "label": "🍔 بوت مطاعم", "description": "بوت منيو وطلبات للمطاعم", "category": "متجر", "visible": true, "requires_subbot": false},
+  {"key": "support", "label": "🎫 بوت دعم فني", "description": "بوت دردشة ودعم فني للمتابعين", "category": "دعم فني", "visible": true, "requires_subbot": false}
+]

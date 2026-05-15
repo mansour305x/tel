@@ -7,8 +7,11 @@ venv/
 env/
 mansour_factory.db
 *.db
+*.db-journal
 backups/
 users_export.csv
 downloads/
 temp/
 .cache/
+.vscode/
+.pytest_cache/

@@ -1,0 +1,13 @@
+[
+  {"type": "message", "label": "عرض رسالة"},
+  {"type": "url", "label": "فتح رابط"},
+  {"type": "menu", "label": "فتح قائمة"},
+  {"type": "template", "label": "تشغيل قالب"},
+  {"type": "support", "label": "إرسال للدعم"},
+  {"type": "project_start", "label": "تشغيل بوت"},
+  {"type": "project_stop", "label": "إيقاف بوت"},
+  {"type": "project_restart", "label": "إعادة تشغيل بوت"},
+  {"type": "stats", "label": "عرض إحصائيات"},
+  {"type": "broadcast", "label": "إرسال جماعي"},
+  {"type": "setting_toggle", "label": "تبديل إعداد"}
+]

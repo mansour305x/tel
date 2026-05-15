@@ -1,37 +1,26 @@
-from __future__ import annotations
-
 import asyncio
+import logging
+
 from aiogram import Application
-from dotenv import load_dotenv
+from aiogram.enums import ParseMode
 
 from bot.config import BotConfig
-from bot.database.setup import initialize_database
-from bot.handlers.commands import register_handlers
-from bot.logger import configure_logging
-from bot.services.settings_service import SettingsService
-from bot.services.task_manager import TaskManager
+from bot.database import initialize_database
+from bot.handlers import register_handlers
 
 
 def create_application() -> Application:
-    load_dotenv()
     config = BotConfig()
-    configure_logging(config.log_level)
     config.ensure_directories()
-    settings_service = SettingsService(config.database_url)
-    task_manager = TaskManager(config, settings_service)
+    logging.basicConfig(level=getattr(logging, config.log_level, logging.INFO))
 
-    app = Application.builder().token(config.bot_token).build()
-    app.include_router(register_handlers(task_manager, settings_service))
+    app = Application.builder().token(config.bot_token).parse_mode(ParseMode.HTML).build()
+    for router in register_handlers():
+        app.include_router(router)
 
     @app.startup
     async def on_startup() -> None:
-        await initialize_database(config.database_url)
-        await settings_service.initialize()
-        await task_manager.start()
-
-    @app.shutdown
-    async def on_shutdown() -> None:
-        await task_manager.shutdown()
+        await initialize_database(config)
 
     return app
 
