@@ -1,10 +1,7 @@
 import asyncio
-import inspect
 
 from bot.main import main
 
 
-if name == "__main__":
-    result = main()
-    if inspect.isawaitable(result):
-        asyncio.run(result)
+if __name__ == "__main__":
+    asyncio.run(main())
