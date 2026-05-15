@@ -4,3 +4,6 @@ __pycache__/
 .venv/
 mansour_factory.db
 *.db
+main_backup.py
+main_stable.py
+main_before_*.py
