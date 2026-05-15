@@ -1,0 +1,37 @@
+[project]
+name = "telegram-video-downloader-bot"
+version = "0.1.0"
+description = "Telegram bot for downloading videos from YouTube, TikTok, Instagram, and Snapchat using aiogram, yt-dlp, and FFmpeg."
+authors = [
+  { name = "mansour305x", email = "" }
+]
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+classifiers = [
+  "Programming Language :: Python :: 3.11",
+  "Framework :: AsyncIO",
+  "Topic :: Communications :: Chat",
+  "Topic :: Utilities"
+]
+
+[project.dependencies]
+aiogram = "^3.0.0b7"
+yt-dlp = "^2023.9.24"
+python-dotenv = "^1.0.0"
+SQLAlchemy = "^2.0.30"
+aiosqlite = "^0.22.1"
+loguru = "^0.7.0"
+pytest = { version = "^8.0.0", optional = true }
+pytest-asyncio = { version = "^0.22.0", optional = true }
+mypy = { version = "^1.5.1", optional = true }
+ruff = { version = "^0.0.280", optional = true }
+aiofiles = "^23.1.0"
+
+[project.optional-dependencies]
+test = ["pytest", "pytest-asyncio"]
+lint = ["ruff", "mypy"]
+
+[build-system]
+requires = ["setuptools>=65.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
