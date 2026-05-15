@@ -1,5 +1,4 @@
 from aiogram import Router
-from aiogram.filters import Text
 from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
 
 from bot.config import BotConfig
@@ -21,8 +20,10 @@ async def _owner_guard(callback: CallbackQuery) -> bool:
     return True
 
 
-@router.callback_query(Text("owner_projects"))
+@router.callback_query()
 async def owner_projects(callback: CallbackQuery) -> None:
+    if callback.data != "owner_projects":
+        return
     if not await _owner_guard(callback):
         return
     projects = await list_user_projects(callback.from_user.id)
@@ -44,8 +45,10 @@ async def owner_projects(callback: CallbackQuery) -> None:
     await callback.message.edit_text("\n".join(lines), parse_mode="HTML", reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons))
 
 
-@router.callback_query(Text(startswith="project_manage:"))
+@router.callback_query()
 async def project_manage(callback: CallbackQuery) -> None:
+    if not (callback.data and callback.data.startswith("project_manage:")):
+        return
     project_id = int(callback.data.split(":", 1)[1])
     project = await get_project(project_id)
     if not project:
@@ -69,8 +72,10 @@ async def project_manage(callback: CallbackQuery) -> None:
     )
 
 
-@router.callback_query(Text(startswith="project_action:"))
+@router.callback_query()
 async def project_action(callback: CallbackQuery) -> None:
+    if not (callback.data and callback.data.startswith("project_action:")):
+        return
     parts = callback.data.split(":")
     project_id = int(parts[1])
     action = parts[2]

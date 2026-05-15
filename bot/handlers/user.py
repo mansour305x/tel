@@ -1,5 +1,5 @@
 from aiogram import Router
-from aiogram.filters import CommandStart, Text
+from aiogram.filters import CommandStart
 from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
 
 from bot.database import all_templates, get_template, register_user
@@ -21,8 +21,10 @@ async def start_handler(message: Message) -> None:
     )
 
 
-@router.callback_query(Text("home"))
+@router.callback_query()
 async def home_callback(callback: CallbackQuery) -> None:
+    if callback.data != "home":
+        return
     config = BotConfig()
     await callback.answer("✅ تم العودة إلى القائمة الرئيسية")
     await callback.message.edit_text(
@@ -32,8 +34,10 @@ async def home_callback(callback: CallbackQuery) -> None:
     )
 
 
-@router.callback_query(Text("templates"))
+@router.callback_query()
 async def templates_callback(callback: CallbackQuery) -> None:
+    if callback.data != "templates":
+        return
     templates = await all_templates()
     if not templates:
         await callback.answer("⚠️ لا توجد قوالب متاحة");
@@ -50,8 +54,10 @@ async def templates_callback(callback: CallbackQuery) -> None:
     await callback.message.edit_text("\n".join(lines), parse_mode="HTML", reply_markup=keyboard)
 
 
-@router.callback_query(Text(startswith="template:"))
+@router.callback_query()
 async def template_detail_callback(callback: CallbackQuery) -> None:
+    if not (callback.data and callback.data.startswith("template:")):
+        return
     template_id = int(callback.data.split(":", 1)[1])
     item = await get_template(template_id)
     if not item:

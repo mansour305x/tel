@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from aiogram import Router
 from aiogram.enums.parse_mode import ParseMode
-from aiogram.filters import Command, Text
+from aiogram.filters import Command
 from aiogram.types import CallbackQuery, Message
 from bot.exceptions.errors import UnsupportedPlatformError, ValidationError
 from bot.keyboards.menus import admin_keyboard, quality_selection_keyboard, settings_keyboard
@@ -152,8 +152,10 @@ def register_handlers(task_manager: TaskManager, settings_service: SettingsServi
         except Exception:
             await message.answer("⚠️ حدث خطأ أثناء تحليل الرابط. تأكد من أن الرابط صالح ومدعوم.")
 
-    @router.callback_query(Text(startswith="download:"))
+    @router.callback_query()
     async def download_callback(callback: CallbackQuery) -> None:
+        if not (callback.data and callback.data.startswith("download:")):
+            return
         await callback.answer()
         _, job_id, quality = callback.data.split(":")
         try:
@@ -165,8 +167,10 @@ def register_handlers(task_manager: TaskManager, settings_service: SettingsServi
         except Exception:
             await callback.message.edit_text("⚠️ تعذر معالجة الطلب. حاول مرة أخرى لاحقًا.")
 
-    @router.callback_query(Text(startswith="cancel:"))
+    @router.callback_query()
     async def cancel_callback(callback: CallbackQuery) -> None:
+        if not (callback.data and callback.data.startswith("cancel:")):
+            return
         await callback.answer()
         _, job_id = callback.data.split(":")
         try:
@@ -175,8 +179,10 @@ def register_handlers(task_manager: TaskManager, settings_service: SettingsServi
         except Exception:
             await callback.message.edit_text("⚠️ تعذر إلغاء الطلب أو لقد اكتمل بالفعل.")
 
-    @router.callback_query(Text(startswith="settings:"))
+    @router.callback_query()
     async def settings_callback(callback: CallbackQuery) -> None:
+        if not (callback.data and callback.data.startswith("settings:")):
+            return
         await callback.answer()
         if callback.from_user.id not in task_manager.config.admin_ids:
             await callback.message.answer("⚠️ هذا الأمر للمسؤولين فقط.")

@@ -1,5 +1,4 @@
 from aiogram import Router
-from aiogram.filters import Text
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
@@ -26,8 +25,10 @@ async def _owner_guard(callback: CallbackQuery) -> bool:
     return True
 
 
-@router.callback_query(Text("support"))
+@router.callback_query()
 async def support_panel(callback: CallbackQuery, state: FSMContext) -> None:
+    if callback.data != "support":
+        return
     await state.set_state(SupportStates.message)
     await callback.answer("✅ تم فتح الدعم")
     await callback.message.answer("أرسل رسالة الدعم التي تريدها الآن.")
@@ -42,8 +43,10 @@ async def support_message(message: Message, state: FSMContext) -> None:
     await state.clear()
 
 
-@router.callback_query(Text("owner_support_messages"))
+@router.callback_query()
 async def owner_support_messages(callback: CallbackQuery) -> None:
+    if callback.data != "owner_support_messages":
+        return
     if not await _owner_guard(callback):
         return
     rows = await get_support_messages()

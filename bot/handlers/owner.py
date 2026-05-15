@@ -4,9 +4,9 @@ import sys
 import asyncio
 from pathlib import Path
 from aiogram import Router
-from aiogram.filters import Text
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
+from aiogram.filters import StateFilter
 from aiogram.types import CallbackQuery, FSInputFile, InlineKeyboardButton, InlineKeyboardMarkup, Message
 
 from bot.config import BotConfig
@@ -67,24 +67,30 @@ async def _owner_guard(callback: CallbackQuery) -> bool:
     return True
 
 
-@router.callback_query(Text("owner_panel"))
+@router.callback_query()
 async def owner_panel(callback: CallbackQuery) -> None:
+    if callback.data != "owner_panel":
+        return
     if not await _owner_guard(callback):
         return
     await callback.answer("✅ تم فتح لوحة المالك")
     await callback.message.edit_text("👑 <b>لوحة المالك</b>\n\nاختر العملية:", parse_mode="HTML", reply_markup=owner_menu())
 
 
-@router.callback_query(Text("builder_panel"))
+@router.callback_query()
 async def builder_panel(callback: CallbackQuery) -> None:
+    if callback.data != "builder_panel":
+        return
     if not await _owner_guard(callback):
         return
     await callback.answer("✅ تم فتح صانع القوالب والأزرار")
     await callback.message.edit_text("🧩 <b>صانع القوالب والأزرار</b>\n\nاختر العملية:", parse_mode="HTML", reply_markup=builder_menu())
 
 
-@router.callback_query(Text("builder_add_template"))
+@router.callback_query()
 async def builder_add_template(callback: CallbackQuery, state: FSMContext) -> None:
+    if callback.data != "builder_add_template":
+        return
     if not await _owner_guard(callback):
         return
     await state.set_state(TemplateStates.key)
@@ -172,8 +178,10 @@ async def template_requires_subbot(message: Message, state: FSMContext) -> None:
     await message.answer(preview, reply_markup=confirm_menu(), parse_mode="HTML")
 
 
-@router.callback_query(Text("confirm_save"), state=TemplateStates.preview)
+@router.callback_query(StateFilter(TemplateStates.preview))
 async def template_confirm_save(callback: CallbackQuery, state: FSMContext) -> None:
+    if callback.data != "confirm_save":
+        return
     data = await state.get_data()
     try:
         await create_template(
@@ -194,15 +202,19 @@ async def template_confirm_save(callback: CallbackQuery, state: FSMContext) -> N
         await state.clear()
 
 
-@router.callback_query(Text("confirm_cancel"), state=TemplateStates.preview)
+@router.callback_query(StateFilter(TemplateStates.preview))
 async def template_confirm_cancel(callback: CallbackQuery, state: FSMContext) -> None:
+    if callback.data != "confirm_cancel":
+        return
     await callback.answer("❌ تم إلغاء العملية")
     await callback.message.edit_text("⚠️ تم إلغاء إضافة القالب.", reply_markup=owner_menu())
     await state.clear()
 
 
-@router.callback_query(Text("builder_list_templates"))
+@router.callback_query()
 async def builder_list_templates(callback: CallbackQuery) -> None:
+    if callback.data != "builder_list_templates":
+        return
     if not await _owner_guard(callback):
         return
     templates = await list_templates(active_only=False)
@@ -221,8 +233,10 @@ async def builder_list_templates(callback: CallbackQuery) -> None:
     await callback.message.edit_text("\n".join(lines), parse_mode="HTML", reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons))
 
 
-@router.callback_query(Text(startswith="template_manage:"))
+@router.callback_query()
 async def template_manage(callback: CallbackQuery) -> None:
+    if not (callback.data and callback.data.startswith("template_manage:")):
+        return
     template_id = int(callback.data.split(":", 1)[1])
     item = await get_template(template_id)
     if not item:
@@ -242,8 +256,10 @@ async def template_manage(callback: CallbackQuery) -> None:
     )
 
 
-@router.callback_query(Text(startswith="template_delete:"))
+@router.callback_query()
 async def template_delete(callback: CallbackQuery) -> None:
+    if not (callback.data and callback.data.startswith("template_delete:")):
+        return
     template_id = int(callback.data.split(":", 1)[1])
     await delete_template(template_id)
     await add_log("INFO", f"تم حذف قالب {template_id}")
@@ -251,8 +267,10 @@ async def template_delete(callback: CallbackQuery) -> None:
     await callback.message.answer("✅ تم حذف القالب بنجاح.", reply_markup=owner_menu())
 
 
-@router.callback_query(Text(startswith="template_toggle:"))
+@router.callback_query()
 async def template_toggle(callback: CallbackQuery) -> None:
+    if not (callback.data and callback.data.startswith("template_toggle:")):
+        return
     template_id = int(callback.data.split(":", 1)[1])
     item = await get_template(template_id)
     if not item:
@@ -264,8 +282,10 @@ async def template_toggle(callback: CallbackQuery) -> None:
     await callback.message.answer("✅ تم تحديث حالة القالب بنجاح.", reply_markup=owner_menu())
 
 
-@router.callback_query(Text("builder_add_button"))
+@router.callback_query()
 async def builder_add_button(callback: CallbackQuery, state: FSMContext) -> None:
+    if callback.data != "builder_add_button":
+        return
     if not await _owner_guard(callback):
         return
     await state.set_state(ButtonStates.name)
@@ -340,8 +360,10 @@ async def button_position(message: Message, state: FSMContext) -> None:
         await message.answer(f"❌ {exc}")
 
 
-@router.callback_query(Text("confirm_save"), state=ButtonStates.preview)
+@router.callback_query(StateFilter(ButtonStates.preview))
 async def button_confirm_save(callback: CallbackQuery, state: FSMContext) -> None:
+    if callback.data != "confirm_save":
+        return
     data = await state.get_data()
     try:
         await create_button(
@@ -361,8 +383,10 @@ async def button_confirm_save(callback: CallbackQuery, state: FSMContext) -> Non
         await state.clear()
 
 
-@router.callback_query(Text("builder_list_buttons"))
+@router.callback_query()
 async def builder_list_buttons(callback: CallbackQuery) -> None:
+    if callback.data != "builder_list_buttons":
+        return
     if not await _owner_guard(callback):
         return
     buttons_list = await list_buttons(active_only=False)
@@ -381,8 +405,10 @@ async def builder_list_buttons(callback: CallbackQuery) -> None:
     await callback.message.edit_text("\n".join(lines), parse_mode="HTML", reply_markup=InlineKeyboardMarkup(inline_keyboard=buttons))
 
 
-@router.callback_query(Text(startswith="button_manage:"))
+@router.callback_query()
 async def button_manage(callback: CallbackQuery) -> None:
+    if not (callback.data and callback.data.startswith("button_manage:")):
+        return
     button_id = int(callback.data.split(":", 1)[1])
     item = await get_button(button_id)
     if not item:
@@ -402,8 +428,10 @@ async def button_manage(callback: CallbackQuery) -> None:
     )
 
 
-@router.callback_query(Text(startswith="button_delete:"))
+@router.callback_query()
 async def button_delete(callback: CallbackQuery) -> None:
+    if not (callback.data and callback.data.startswith("button_delete:")):
+        return
     button_id = int(callback.data.split(":", 1)[1])
     await delete_button(button_id)
     await add_log("INFO", f"تم حذف زر {button_id}")
@@ -411,8 +439,10 @@ async def button_delete(callback: CallbackQuery) -> None:
     await callback.message.answer("✅ تم حذف الزر بنجاح.", reply_markup=owner_menu())
 
 
-@router.callback_query(Text(startswith="button_toggle:"))
+@router.callback_query()
 async def button_toggle(callback: CallbackQuery) -> None:
+    if not (callback.data and callback.data.startswith("button_toggle:")):
+        return
     button_id = int(callback.data.split(":", 1)[1])
     item = await get_button(button_id)
     if not item:
@@ -424,8 +454,10 @@ async def button_toggle(callback: CallbackQuery) -> None:
     await callback.message.answer("✅ تم تحديث حالة الزر بنجاح.", reply_markup=owner_menu())
 
 
-@router.callback_query(Text("owner_info"))
+@router.callback_query()
 async def owner_info(callback: CallbackQuery) -> None:
+    if callback.data != "owner_info":
+        return
     if not await _owner_guard(callback):
         return
     config = BotConfig()
@@ -440,8 +472,10 @@ async def owner_info(callback: CallbackQuery) -> None:
     )
 
 
-@router.callback_query(Text("owner_check"))
+@router.callback_query()
 async def owner_check(callback: CallbackQuery) -> None:
+    if callback.data != "owner_check":
+        return
     if not await _owner_guard(callback):
         return
     maintenance = await get_setting("maintenance") or "off"
@@ -452,8 +486,10 @@ async def owner_check(callback: CallbackQuery) -> None:
     )
 
 
-@router.callback_query(Text("owner_backup"))
+@router.callback_query()
 async def owner_backup(callback: CallbackQuery) -> None:
+    if callback.data != "owner_backup":
+        return
     if not await _owner_guard(callback):
         return
     from bot.services.backup import create_backup
@@ -464,8 +500,10 @@ async def owner_backup(callback: CallbackQuery) -> None:
     await callback.message.answer(f"💾 تم حفظ النسخة الاحتياطية في:\n<code>{backup}</code>", parse_mode="HTML", reply_markup=owner_menu())
 
 
-@router.callback_query(Text("owner_publish"))
+@router.callback_query()
 async def owner_publish(callback: CallbackQuery) -> None:
+    if callback.data != "owner_publish":
+        return
     if not await _owner_guard(callback):
         return
     config = BotConfig()
@@ -481,8 +519,10 @@ async def owner_publish(callback: CallbackQuery) -> None:
     )
 
 
-@router.callback_query(Text("owner_restart"))
+@router.callback_query()
 async def owner_restart(callback: CallbackQuery) -> None:
+    if callback.data != "owner_restart":
+        return
     if not await _owner_guard(callback):
         return
     await callback.answer("♻️ جاري إعادة تشغيل البوت")
@@ -490,8 +530,10 @@ async def owner_restart(callback: CallbackQuery) -> None:
     os.execv(sys.executable, [sys.executable] + sys.argv)
 
 
-@router.callback_query(Text("owner_maintenance"))
+@router.callback_query()
 async def owner_maintenance(callback: CallbackQuery) -> None:
+    if callback.data != "owner_maintenance":
+        return
     if not await _owner_guard(callback):
         return
     current = await get_setting("maintenance") or "off"
@@ -502,8 +544,10 @@ async def owner_maintenance(callback: CallbackQuery) -> None:
     await callback.message.answer(f"🔧 تم تغيير وضع الصيانة إلى: {new_value}", reply_markup=owner_menu())
 
 
-@router.callback_query(Text("owner_stats"))
+@router.callback_query()
 async def owner_stats(callback: CallbackQuery) -> None:
+    if callback.data != "owner_stats":
+        return
     if not await _owner_guard(callback):
         return
     total_templates = len(await list_templates(active_only=False))
@@ -516,24 +560,30 @@ async def owner_stats(callback: CallbackQuery) -> None:
     )
 
 
-@router.callback_query(Text("owner_users"))
+@router.callback_query()
 async def owner_users(callback: CallbackQuery) -> None:
+    if callback.data != "owner_users":
+        return
     if not await _owner_guard(callback):
         return
     await callback.answer("✅ تم عرض إدارة المستخدمين")
     await callback.message.answer("👥 إدارة المستخدمين متاحة من خلال قاعدة البيانات واللوحة المستقبلية.", reply_markup=owner_menu())
 
 
-@router.callback_query(Text("owner_admins"))
+@router.callback_query()
 async def owner_admins(callback: CallbackQuery) -> None:
+    if callback.data != "owner_admins":
+        return
     if not await _owner_guard(callback):
         return
     await callback.answer("✅ تم فتح إدارة الأدمن")
     await callback.message.answer("👮 إدارة الأدمنات تحت التطوير وتعمل من خلال الإعدادات الداخلية.", reply_markup=owner_menu())
 
 
-@router.callback_query(Text("owner_subscriptions"))
+@router.callback_query()
 async def owner_subscriptions(callback: CallbackQuery) -> None:
+    if callback.data != "owner_subscriptions":
+        return
     if not await _owner_guard(callback):
         return
     await callback.answer("✅ تم فتح إدارة الاشتراكات")

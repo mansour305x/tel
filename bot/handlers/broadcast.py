@@ -1,5 +1,4 @@
 from aiogram import Router
-from aiogram.filters import Text
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.types import CallbackQuery, Message
@@ -26,8 +25,10 @@ async def _owner_guard(callback: CallbackQuery) -> bool:
     return True
 
 
-@router.callback_query(Text("owner_broadcast"))
+@router.callback_query()
 async def owner_broadcast(callback: CallbackQuery, state: FSMContext) -> None:
+    if callback.data != "owner_broadcast":
+        return
     if not await _owner_guard(callback):
         return
     await state.set_state(BroadcastStates.message)

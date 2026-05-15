@@ -208,6 +208,16 @@ async def get_support_messages(limit: int = 20) -> list[dict[str, Any]]:
         return [dict(row) for row in rows]
 
 
+async def add_support_message(user_id: int, username: str | None, message: str) -> int:
+    async with aiosqlite.connect(BotConfig().database_path) as conn:
+        cur = await conn.execute(
+            "INSERT INTO support_messages (user_id, username, message, status, created_at) VALUES (?, ?, ?, 'open', ?)",
+            (user_id, username or "", sanitize_text(message), now_iso()),
+        )
+        await conn.commit()
+        return cur.lastrowid
+
+
 async def register_user(user_id: int, username: str | None, full_name: str | None, role: str = "user") -> None:
     async with aiosqlite.connect(BotConfig().database_path) as conn:
         await conn.execute(
