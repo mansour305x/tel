@@ -1,9 +1,14 @@
 .env
+*.env
 __pycache__/
 *.pyc
 .venv/
+venv/
+env/
 mansour_factory.db
 *.db
-main_backup.py
-main_stable.py
-main_before_*.py
+backups/
+users_export.csv
+downloads/
+temp/
+.cache/

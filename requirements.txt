@@ -1,2 +1,6 @@
 aiogram
 python-dotenv
+aiohttp
+aiosqlite
+sqlalchemy
+yt-dlp
