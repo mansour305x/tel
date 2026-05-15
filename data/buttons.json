@@ -1,11 +1,23 @@
 {
-  "create_bot": "🔧 أنشئ بوت جديد",
-  "my_bots": "🤖 بوتاتي",
-  "templates": "📦 القوالب الجاهزة",
-  "services": "💎 الخدمات",
-  "plans": "💳 الاشتراكات",
-  "support": "🛟 الدعم",
-  "system_status": "📈 حالة النظام",
-  "owner_panel": "👑 لوحة المالك",
-  "admin_panel": "🛠 لوحة الإدارة"
+  "labels": {
+    "create_bot": "🔧 أنشئ بوت جديد",
+    "my_bots": "🤖 بوتاتي",
+    "templates": "📦 القوالب الجاهزة",
+    "services": "💎 الخدمات",
+    "plans": "💳 الاشتراكات",
+    "support": "🛟 الدعم",
+    "system_status": "📈 حالة النظام",
+    "owner_panel": "👑 لوحة المالك",
+    "admin_panel": "🛠 لوحة الإدارة"
+  },
+  "builder_buttons": [
+    {
+      "key": "🛠_الاعدادات",
+      "label": "🛠 الاعدادات",
+      "location": "owner_menu",
+      "action_type": "menu",
+      "action_value": "settings_menu",
+      "active": true
+    }
+  ]
 }

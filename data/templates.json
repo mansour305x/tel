@@ -1,4 +1,322 @@
 [
-  {"key": "restaurant", "label": "🍔 بوت مطاعم", "description": "بوت منيو وطلبات للمطاعم", "category": "متجر", "visible": true, "requires_subbot": false},
-  {"key": "support", "label": "🎫 بوت دعم فني", "description": "بوت دردشة ودعم فني للمتابعين", "category": "دعم فني", "visible": true, "requires_subbot": false}
+  {
+    "key": "restaurant",
+    "label": "🍔 بوت مطاعم",
+    "description": "بوت منيو وطلبات للمطاعم",
+    "category": "متجر",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "support",
+    "label": "🎫 بوت دعم فني",
+    "description": "بوت دردشة ودعم فني للمتابعين",
+    "category": "دعم فني",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "bot_factory",
+    "label": "صانع البوتات",
+    "description": "صانع بوتات جاهز مع قالبٍ كامل وإدارة بسيطة.",
+    "category": "بوتات",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "voice_messages",
+    "label": "بوت الرسائل الصوتية",
+    "description": "بوت لإرسال واستقبال الرسائل الصوتية بسهولة.",
+    "category": "بوتات",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "store_bot",
+    "label": "المتجر",
+    "description": "بوت متجر إلكتروني لعرض منتجاتك واستقبال الطلبات.",
+    "category": "بوتات",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "channel_posts",
+    "label": "إدارة منشورات القناة",
+    "description": "أدوات لإعداد ونشر منشورات القناة بشكل احترافي.",
+    "category": "قنوات",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "comments_bot",
+    "label": "التعليقات",
+    "description": "بوت لإدارة التعليقات والردود داخل القناة أو المجموعة.",
+    "category": "قنوات",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "post_builder",
+    "label": "إنشاء منشورات احترافية",
+    "description": "انشئ منشورات جذابة باستخدام قوالب جاهزة ونصوص مخصصة.",
+    "category": "سوشيال",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "logo_maker",
+    "label": "إنشاء لوجو",
+    "description": "بوت تصميم شعار مباشر مع طرق سهلة للاختيار.",
+    "category": "تصميم",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "translation_bot",
+    "label": "بوت الترجمة",
+    "description": "بوت للترجمة الفورية بين عدة لغات.",
+    "category": "أدوات",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "proxy_bot",
+    "label": "بروكسي",
+    "description": "بوت لتوليد وادارة بروكسيهات آمنة للمستخدمين.",
+    "category": "أمن",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "download_bot",
+    "label": "بوت تحميل",
+    "description": "بوت لتحميل الوسائط من الروابط المختلفة.",
+    "category": "تحميل",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "channel_funding",
+    "label": "تمويل قنوات",
+    "description": "بوت لإدارة الدعم المالي والاشتراكات للقنوات.",
+    "category": "تمويل",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "ai_chat",
+    "label": "التحدث مع الذكاء الاصطناعي",
+    "description": "بوت دردشة ذكي مع واجهة تفاعلية.",
+    "category": "ذكاء اصطناعي",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "site_builder",
+    "label": "سايت",
+    "description": "بوت لتوليد صفحات ويب سريعة من داخل تيليجرام.",
+    "category": "ويب",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "image_analysis",
+    "label": "تحليل الصور",
+    "description": "بوت لتحليل الصور والتعرف على محتواها.",
+    "category": "ذكاء اصطناعي",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "whisper_bot",
+    "label": "بوت الهمسة",
+    "description": "بوت لإرسال رسائل خاصة مع حفظ الخصوصية.",
+    "category": "دردشة",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "button_bot",
+    "label": "بوت الأزرار",
+    "description": "بوت ينشئ أزرارًا مخصصة لتنفيذ أوامر مختلفة.",
+    "category": "أدوات",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "text_copy",
+    "label": "نسخ النصوص",
+    "description": "بوت لتحويل المحتوى من صيغة إلى أخرى أو نسخه بسرعة.",
+    "category": "أدوات",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "name_meaning",
+    "label": "معاني أسماء",
+    "description": "بوت لعرض معاني الأسماء وخلفياتها.",
+    "category": "معلومات",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "channel_links",
+    "label": "استخراج روابط القنوات",
+    "description": "بوت لاستخراج روابط القنوات والمجموعات بسهولة.",
+    "category": "أدوات",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "file_convert",
+    "label": "تحويل صيغ الملفات",
+    "description": "بوت لتحويل أنواع الملفات بين صيغ متعددة.",
+    "category": "أدوات",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "roulette_game",
+    "label": "لعبة الروليت",
+    "description": "بوت لعبة ترفيهية مع نظام قواعد بسيط.",
+    "category": "ترفيه",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "background_remove",
+    "label": "حذف الخلفية من الصور",
+    "description": "بوت لتحرير الصور وإزالة الخلفية تلقائياً.",
+    "category": "تصميم",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "gift_songs",
+    "label": "إهداء الأغاني",
+    "description": "بوت لإهداء الأغاني والمحتوى الموسيقي للأصدقاء.",
+    "category": "ترفيه",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "account_management",
+    "label": "إدارة حساب",
+    "description": "بوت لتنظيم الحسابات وحمايتها.",
+    "category": "أمان",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "photo_to_anime",
+    "label": "تحويل الصور إلى أنمي",
+    "description": "بوت لتحويل الصور إلى ستايل أنمي تلقائياً.",
+    "category": "تصميم",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "join_approval",
+    "label": "الموافقة على الانضمام",
+    "description": "بوت لإدارة قبول الأعضاء الجدد.",
+    "category": "مجتمعات",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "member_check",
+    "label": "تحقق من العضو",
+    "description": "بوت لفحص حالة العضو وصلاحياته.",
+    "category": "أدوات",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "announcements",
+    "label": "الإعلانات",
+    "description": "بوت لإرسال الإعلانات وجدولتها بشكل احترافي.",
+    "category": "قنوات",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "remove_audio",
+    "label": "إزالة الصوت من الأغاني",
+    "description": "بوت لتحويل الأغاني إلى ملفات بدون صوت.",
+    "category": "صوت",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "age_calculator",
+    "label": "حساب العمر",
+    "description": "بوت لحساب العمر بناءً على تاريخ الميلاد.",
+    "category": "أدوات",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "quality_fix",
+    "label": "إصلاح جودة الصورة",
+    "description": "بوت لتحسين جودة الصور تلقائياً.",
+    "category": "تصميم",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "text_to_speech",
+    "label": "تحويل النص إلى صوت",
+    "description": "بوت لتحويل النصوص إلى تسجيلات صوتية.",
+    "category": "صوت",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "sticker_maker",
+    "label": "صانع ملصقات",
+    "description": "بوت لإنشاء ملصقات تيليجرام من الصور والنصوص.",
+    "category": "تصميم",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "temp_email",
+    "label": "بريد إلكتروني مؤقت",
+    "description": "بوت لإنشاء بريد إلكتروني مؤقت للاستخدام السريع.",
+    "category": "أمن",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "channel_protection",
+    "label": "حماية القنوات",
+    "description": "بوت لحماية القنوات من الرسائل المزعجة والهجمات.",
+    "category": "أمان",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "copyright_overlay",
+    "label": "كتابة حقوق على الصور",
+    "description": "بوت لإضافة علامة مائية على الصور تلقائياً.",
+    "category": "تصميم",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "words_to_image",
+    "label": "تحويل الكلمات إلى صور",
+    "description": "بوت لتحويل النصوص الوصفية إلى صور سهلة الاستخدام.",
+    "category": "تصميم",
+    "visible": true,
+    "requires_subbot": false
+  },
+  {
+    "key": "قالب_متكامل_لإدارة_الإعدادات_المتقدمة_والذكية_في_البوت،_يتيح_تخصيصاً_كاملاً_لكل_عناصر_النظام،_بما_في_ذلك_إعدادات_الواجهة،_التحكم_في_الرسائل،_إدارة_الأزرار،_الأنظمة_التلقائية،_الذكاء_الاصطناعي،_الصلاحيات،_الأمان،_الربط_مع_الخدمات_الخارجية،_الإشعارات،_السجلات،_إعدادات_الأداء،_وتخصيص_سلوك_البوت_بدقة_عالية._مصمم_ليغطي_جميع_الاحتياجات_الاحترافية_بدون_أي_نقص.",
+    "label": "الاعدادات",
+    "description": "قالب متكامل لإدارة الإعدادات المتقدمة والذكية في البوت، يتيح تخصيصاً كاملاً لكل عناصر النظام، بما في ذلك إعدادات الواجهة، التحكم في الرسائل، إدارة الأزرار، الأنظمة التلقائية، الذكاء الاصطناعي، الصلاحيات، الأمان، الربط مع الخدمات الخارجية، الإشعارات، السجلات، إعدادات الأداء، وتخصيص سلوك البوت بدقة عالية. مصمم ليغطي جميع الاحتياجات الاحترافية بدون أي نقص.",
+    "category": "غير مصنف",
+    "visible": true,
+    "requires_subbot": false
+  }
 ]

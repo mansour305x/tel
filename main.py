@@ -47,6 +47,7 @@ BACKUP_DIR.mkdir(exist_ok=True)
 DATA_DIR = BASE_DIR / "data"
 TEMPLATES_FILE = DATA_DIR / "templates.json"
 BUTTONS_FILE = DATA_DIR / "buttons.json"
+RESTART_NOTIFY_FILE = DATA_DIR / "restart_notify.json"
 DATA_DIR.mkdir(exist_ok=True)
 
 DEFAULT_TEMPLATES = [
@@ -460,6 +461,65 @@ def save_builder_buttons(buttons: list[dict]):
         data = {"labels": DEFAULT_BUTTONS, "builder_buttons": []}
     data["builder_buttons"] = buttons
     BUTTONS_FILE.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def save_restart_notification(chat_id: int, user_id: int):
+    payload = {
+        "chat_id": chat_id,
+        "user_id": user_id,
+        "requested_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    }
+    RESTART_NOTIFY_FILE.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+
+
+def process_restart_notification():
+    if not RESTART_NOTIFY_FILE.exists():
+        return None
+
+    try:
+        payload = json.loads(RESTART_NOTIFY_FILE.read_text(encoding="utf-8"))
+        if not isinstance(payload, dict):
+            raise ValueError("restart_notify.json content is not an object")
+    except Exception as e:
+        logging.exception("Failed to read restart notification file")
+        try:
+            RESTART_NOTIFY_FILE.unlink()
+        except Exception:
+            pass
+        return None
+
+    try:
+        chat_id = int(payload.get("chat_id"))
+        return chat_id
+    except Exception:
+        logging.exception("Invalid restart notification payload")
+        try:
+            RESTART_NOTIFY_FILE.unlink()
+        except Exception:
+            pass
+        return None
+
+
+def delete_restart_notification():
+    try:
+        if RESTART_NOTIFY_FILE.exists():
+            RESTART_NOTIFY_FILE.unlink()
+    except Exception:
+        logging.exception("Failed to delete restart notification file")
+
+
+async def send_restart_notification_if_exists():
+    if not RESTART_NOTIFY_FILE.exists():
+        return
+
+    try:
+        payload = json.loads(RESTART_NOTIFY_FILE.read_text(encoding="utf-8"))
+        chat_id = int(payload.get("chat_id"))
+        await bot.send_message(chat_id, "✅ تم تشغيل البوت بنجاح.")
+    except Exception:
+        logging.exception("Failed to send restart notification")
+    finally:
+        delete_restart_notification()
 
 
 def get_template_buttons(location: str) -> list[dict]:
@@ -2237,9 +2297,10 @@ async def owner_restart(callback: CallbackQuery):
         await failed(callback, "❌ هذه الخاصية للمالك فقط.")
         return
 
-    await callback.answer("✅ سيتم إعادة التشغيل")
-    await callback.message.answer("♻️ تم تنفيذ أمر إعادة التشغيل.\n\nجاري إعادة تشغيل البوت الآن...")
+    await callback.answer("✅ جارٍ إعادة التشغيل")
+    await callback.message.answer("🔄 يتم إعادة تشغيل البوت الآن...")
 
+    save_restart_notification(callback.message.chat.id, callback.from_user.id)
     await asyncio.sleep(2)
     os.execv(sys.executable, [sys.executable] + sys.argv)
 
@@ -2299,6 +2360,7 @@ async def main():
     init_db()
     ensure_templates_file()
     ensure_buttons_file()
+    await send_restart_notification_if_exists()
     await bot.delete_webhook(drop_pending_updates=True)
     print("Mansour Factory Bot V6 Builder is running...")
     await dp.start_polling(bot)
