@@ -510,13 +510,11 @@ def templates_menu():
 
 def owner_menu():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [btn("📝 تعديل النصوص", "owner_texts"), btn("🔘 تعديل الأزرار", "owner_buttons")],
-        [btn("👮 إدارة الأدمن", "owner_admins"), btn("📢 إرسال جماعي", "owner_broadcast")],
-        [btn("🔧 الصيانة", "owner_maintenance"), btn("📊 الإحصائيات", "owner_stats")],
-        [btn("👥 تصدير المستخدمين", "owner_export_users"), btn("🤖 مشاريع البوتات", "owner_projects")],
-        [btn("🛟 رسائل الدعم", "owner_support_messages"), btn("💾 نسخة احتياطية", "owner_backup")],
+        [btn("📦 إدارة القوالب", "templates"), btn("🤖 بوتات العملاء", "owner_projects")],
+        [btn("👥 إدارة المستخدمين", "owner_export_users"), btn("💳 إدارة الاشتراكات", "owner_subscriptions")],
+        [btn("🧾 سجل العمليات", "owner_logs"), btn("🧪 فحص النظام", "owner_check")],
         [btn("🔄 تحديث البوت", "owner_update"), btn("♻️ إعادة تشغيل", "owner_restart")],
-        [btn("🧪 فحص النظام", "owner_check"), btn("👑 معلومات الملكية", "owner_info")],
+        [btn("👑 معلومات الملكية", "owner_info")],
         [btn("🏠 القائمة الرئيسية", "home")],
     ])
 
@@ -1584,6 +1582,26 @@ async def owner_export_users(callback: CallbackQuery):
     await callback.message.answer_document(FSInputFile(export_path), caption="✅ تم تصدير المستخدمين بنجاح.")
 
 
+@dp.callback_query(F.data == "owner_subscriptions")
+async def owner_subscriptions(callback: CallbackQuery):
+    if not is_owner(callback.from_user.id):
+        await failed(callback, "❌ هذه الخاصية للمالك فقط.")
+        return
+
+    await callback.answer("⚠️ ميزة الاشتراكات غير مفعلة")
+    await safe_edit(callback, "⚠️ ميزة إدارة الاشتراكات غير مفعلة بعد.", owner_menu())
+
+
+@dp.callback_query(F.data == "owner_logs")
+async def owner_logs(callback: CallbackQuery):
+    if not is_owner(callback.from_user.id):
+        await failed(callback, "❌ هذه الخاصية للمالك فقط.")
+        return
+
+    await callback.answer("ℹ️ عرض سجل العمليات")
+    await safe_edit(callback, "ℹ️ لا توجد سجلات عمليات متاحة حالياً.", owner_menu())
+
+
 @dp.callback_query(F.data == "owner_backup")
 async def owner_backup(callback: CallbackQuery):
     if not is_owner(callback.from_user.id):
@@ -1784,7 +1802,7 @@ async def owner_info(callback: CallbackQuery):
 async def main():
     init_db()
     await bot.delete_webhook(drop_pending_updates=True)
-    print("Mansour Factory Bot V3 is running...")
+    print("Mansour Factory Bot V4 is running...")
     await dp.start_polling(bot)
 
 
